@@ -1,5 +1,4 @@
-
-
+package frc.robot;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -15,13 +14,10 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+
 public class Robot extends LoggedRobot {
-  private RobotContainer robotContainer;
-
-  private Command autoCommand;
-  private boolean matchStartingMethodCalled = false;
-
-  public Robot() {
+        private RobotContainer robotContainer;
+      public Robot() {
     Pathfinding.setPathfinder(new LocalADStarAK());
 
     PathPlannerLogging.setLogTargetPoseCallback(
@@ -49,3 +45,40 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("GitDirty", "Unknown");
         break;
     }
+
+    // Set up data receivers & replay source
+    switch (Constants.getRobotMode()) {
+      case REAL:
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        // Replaying a log, set up replay source
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+
+        if (logPath == null || logPath.isEmpty()) {
+          System.err.println("Error: Replay log not found. Ensure a valid log file is available.");
+          throw new IllegalStateException("Replay log not found.");
+        }
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        break;
+    }
+
+    // Start AdvantageKit logger
+    Logger.start();
+
+    robotContainer = new RobotContainer();
+
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+    CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
+  }
+}
