@@ -356,10 +356,6 @@ public class RobotContainer {
     Logger.recordOutput("Testing/Blank Pose3d", new Pose3d());
 
     SimulatedArena.getInstance().simulationPeriodic();
-<<<<<<< Updated upstream
-=======
-    
->>>>>>> Stashed changes
     Logger.recordOutput(
         "Field Simulation/Robot Position",
         RobotSimState.getInstance().getDriveSimulation().getSimulatedDriveTrainPose());
