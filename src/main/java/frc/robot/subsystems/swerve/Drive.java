@@ -15,7 +15,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -104,11 +103,6 @@ public class Drive extends SubsystemBase {
         Arrays.stream(modules)
             .map(module -> module.getModulePosition())
             .toArray(SwerveModulePosition[]::new);
-
-    RobotState.getInstance()
-        .addOdometryMeasurement(
-            new RobotState.OdometryMeasurement(
-                wheelPositions, gyroInputs.yawPosition, Timer.getTimestamp()));
 
     switch (driveMode) {
       case TELEOP -> {

@@ -14,7 +14,6 @@ import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -39,7 +38,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotState.ShootingAnglePredictor.HoodParams;
 import frc.robot.subsystems.swerve.DriveConstants;
-import frc.robot.subsystems.vision.VisionConstants;
 import java.util.HashMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -64,20 +62,6 @@ public class RobotState {
 
   private final Matrix<N3, N1> matrixQ = new Matrix<>(Nat.N3(), Nat.N1());
 
-  private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(
-          DriveConstants.KINEMATICS,
-          new Rotation2d(),
-          new SwerveModulePosition[] {
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition(),
-            new SwerveModulePosition()
-          },
-          initialPose,
-          DriveConstants.STATE_STD_DEVS,
-          VisionConstants.VISION_STATE_STD_DEVS);
-
   private Pose2d estimatedPose = initialPose; // vision adjusted
 
   private Pose2d lastApproachPose = new Pose2d();
@@ -98,24 +82,8 @@ public class RobotState {
     }
   }
 
-  /* update pose estimation based on odometry measurements*/
-  public void addOdometryMeasurement(OdometryMeasurement measurement) {
-    poseEstimator.updateWithTime(
-        measurement.timestamp(), measurement.gyroAngle(), measurement.wheelPositions());
-
-    // integrate to find difference in pose over time, add to pose estimate
-    estimatedPose = poseEstimator.getEstimatedPosition();
-  }
-
-  public void addVisionMeasurement(VisionMeasurement measurement, Matrix<N3, N1> visionStdDevs) {
-    poseEstimator.setVisionMeasurementStdDevs(visionStdDevs);
-    poseEstimator.addVisionMeasurement(measurement.visionPose(), measurement.timestamp());
-    estimatedPose = poseEstimator.getEstimatedPosition();
-  }
-
   public void resetPose(Pose2d pose) {
     estimatedPose = pose;
-    poseEstimator.resetPose(pose);
   }
 
   @AutoLogOutput(key = "Robot State/Estimated Pose")

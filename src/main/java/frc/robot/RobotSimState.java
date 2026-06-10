@@ -16,7 +16,6 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.swerve.DriveConstants;
-import frc.robot.utility.FuelSim;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.*;
@@ -45,30 +44,10 @@ public class RobotSimState {
 
     SimulatedArena.overrideInstance(arena);
 
-    // init fuel sim
-    fuelSim = new FuelSim("Field Simulation");
-    fuelSim.registerRobot(
-        DriveConstants.mapleSimConfig.bumperWidthY, // from left to right in meters
-        DriveConstants.mapleSimConfig.bumperLengthX, // from front to back in meters
-        Units.Inches.of(7), // from floor to top of bumpers in meters
-        driveSimulation::getSimulatedDriveTrainPose, // Supplier<Pose2d> of robot pose
-        driveSimulation::getDriveTrainSimulatedChassisSpeedsFieldRelative);
-
     // Register intake on the back of the robot
     double halfLength = DriveConstants.mapleSimConfig.bumperLengthX.in(Meters) / 2.0;
     double halfWidth = DriveConstants.mapleSimConfig.bumperWidthY.in(Meters) / 2.0;
     double intakeReach = 0.1; // meters beyond bumper
-    fuelSim.registerIntake(
-        -halfLength - intakeReach,
-        -halfLength,
-        -halfWidth,
-        halfWidth,
-        () -> intakeActive && fuelCount < 60,
-        () -> fuelCount++);
-
-    fuelSim.spawnStartingFuel();
-    fuelSim.setLoggingFrequency(20);
-    fuelSim.start();
   }
 
   // Singleton instance
@@ -90,12 +69,6 @@ public class RobotSimState {
 
   public SwerveDriveSimulation getDriveSimulation() {
     return driveSimulation;
-  }
-
-  private FuelSim fuelSim;
-
-  public FuelSim getFuelSim() {
-    return fuelSim;
   }
 
   // Get attributes of physical drivebase
@@ -135,8 +108,6 @@ public class RobotSimState {
                 shooterTransform3d.getTranslation(),
                 new Rotation3d(0, 0, shooterTransform3d.getRotation().getZ()))
             .plus(shooterOffset);
-
-    fuelSim.launchFuel(launchVelocity, launchAngle, launchTransform);
   }
 
   // Intake simulation (backed by FuelSim)
