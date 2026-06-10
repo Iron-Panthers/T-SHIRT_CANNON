@@ -9,7 +9,8 @@ public class ShooterAccelerator
   public enum ShooterAcceleratorTarget implements GenericRollers.VelocityTarget {
     IDLE(0, ShooterAcceleratorConstants.CURRENT_LIMIT_AMPS),
     SHOOT(50.44, ShooterAcceleratorConstants.CURRENT_LIMIT_AMPS),
-    WARMUP_ACCELERATOR(60, ShooterAcceleratorConstants.CURRENT_LIMIT_AMPS);
+    WARMUP_ACCELERATOR(60, ShooterAcceleratorConstants.CURRENT_LIMIT_AMPS),
+    PASS(70, ShooterAcceleratorConstants.CURRENT_LIMIT_AMPS);
 
     private double velocity;
     private double supplyCurrentLimit;

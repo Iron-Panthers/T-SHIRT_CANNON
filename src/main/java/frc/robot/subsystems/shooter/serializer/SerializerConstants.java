@@ -9,9 +9,9 @@ public class SerializerConstants {
         case SIM -> new SerializerConfig(
             CAN.at(32, "Serializer"), CAN.at(0, "Serializer 2"), 5, true, false, true);
         case COMP -> new SerializerConfig(
-            CAN.at(39, "Serializer Left"),
-            CAN.at(5, "Serializer Right"),
-            26 / 18.0,
+            CAN.at(41, "Serializer Left"),
+            CAN.at(33, "Serializer Right"),
+            2.833333,
             false,
             false,
             true);
@@ -22,15 +22,13 @@ public class SerializerConstants {
   public static final PIDGains GAINS =
       switch (Constants.getRobotType()) {
         case SIM -> new PIDGains(1, 0, 0, 0, 1, 0, 0);
-        case COMP -> new PIDGains(0.5, 0, 0, 0.2, 0.17167, 0, 0);
+        case COMP -> new PIDGains(0.5, 0, 0, 0.2, 0.344827586, 0, 0);
         default -> new PIDGains(0, 0, 0, 0, 0, 0, 0);
       };
 
-  public static final int CURRENT_LIMIT_AMPS = 30;
-  public static final double UPPER_VOLT_LIMIT = 10;
-  public static final double LOWER_VOLT_LIMIT = -10;
+  public static final int CURRENT_LIMIT_AMPS = 20;
 
-  public static final double STATOR_CURRENT_LIMIT = 50;
+  public static final double STATOR_CURRENT_LIMIT = 30;
 
   public static final SerializerPhysicalConstants PHYSICAL_CONSTANTS =
       switch (Constants.getRobotType()) {

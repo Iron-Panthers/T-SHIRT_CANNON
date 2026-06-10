@@ -13,11 +13,13 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.MotorOutputManager;
 import java.util.ArrayList;
 
 public abstract class GenericRollersIOTalonFX implements GenericRollersIO {
   protected final TalonFX talon;
   protected final ArrayList<TalonFX> followerMotors;
+  protected final ArrayList<StatusSignal<Current>> followerMotorSupplyCurrents;
   protected final TalonFXConfiguration config;
   protected Slot0Configs gainsConfig;
 
@@ -50,6 +52,7 @@ public abstract class GenericRollersIOTalonFX implements GenericRollersIO {
     config.HardwareLimitSwitch.ReverseLimitEnable = false;
     // Initialize follower motors
     followerMotors = new ArrayList<>();
+    followerMotorSupplyCurrents = new ArrayList<>();
     for (GenericRollersConfiguration.FollowerMotorConfig followerConfig :
         rollersConfig.followerMotors) {
       TalonFX followerTalon = new TalonFX(followerConfig.id());
@@ -57,7 +60,11 @@ public abstract class GenericRollersIOTalonFX implements GenericRollersIO {
           new Follower(rollersConfig.id, followerConfig.motorAlignmentValue()));
       followerTalon.setNeutralMode(rollersConfig.neutralMode);
       followerTalon.getConfigurator().apply(config);
+      followerTalon.optimizeBusUtilization();
       followerMotors.add(followerTalon);
+
+      MotorOutputManager.getInstance()
+          .registerMotorOutputs(() -> followerTalon.getSupplyCurrent().getValueAsDouble());
     }
 
     position = talon.getPosition();
@@ -65,12 +72,13 @@ public abstract class GenericRollersIOTalonFX implements GenericRollersIO {
     appliedVolts = talon.getMotorVoltage();
     supplyCurrent = talon.getSupplyCurrent();
     statorCurrent = talon.getStatorCurrent();
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50, position, velocity, appliedVolts, supplyCurrent, statorCurrent);
+    BaseStatusSignal.setUpdateFrequencyForAll(50, velocity, appliedVolts, supplyCurrent);
 
     if (followerMotors.size() == 0) {
       talon.optimizeBusUtilization();
     }
+
+    MotorOutputManager.getInstance().registerMotorOutputs(() -> supplyCurrent.getValueAsDouble());
   }
 
   @Override
@@ -83,6 +91,8 @@ public abstract class GenericRollersIOTalonFX implements GenericRollersIO {
     inputs.appliedVolts = appliedVolts.getValueAsDouble();
     inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
+    inputs.positionRads =
+        Units.rotationsToRadians(position.getValueAsDouble()) / mechanismReduction;
   }
 
   @Override

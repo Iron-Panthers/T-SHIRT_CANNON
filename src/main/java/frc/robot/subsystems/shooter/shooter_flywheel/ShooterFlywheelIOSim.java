@@ -77,6 +77,7 @@ public class ShooterFlywheelIOSim extends GenericRollersIOSim implements Shooter
     rotorPositionRotations += currentVelocityRPS * 0.02;
 
     inputs.connected = true;
+    inputs.positionRads = rotorPositionRotations * 2.0 * Math.PI;
     inputs.velocityRadsPerSec = shooterFlywheelsSim.getAngularVelocityRadPerSec();
     inputs.appliedVolts = appliedVoltage;
     inputs.supplyCurrentAmps = Math.abs(shooterFlywheelsSim.getCurrentDrawAmps());

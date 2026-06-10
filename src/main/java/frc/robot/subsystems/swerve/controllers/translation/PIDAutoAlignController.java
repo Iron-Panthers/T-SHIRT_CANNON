@@ -184,4 +184,10 @@ public class PIDAutoAlignController extends BaseTranslationController {
         positionSupplier.get().getTranslation().getDistance(targetPosition.getTranslation())
             < PID_AUTOALIGN_CONSTANTS.tolerance() * (hasReachedTarget ? 4 : 1);
   }
+
+  public boolean almostAtTarget() {
+    return hasReachedTarget =
+        positionSupplier.get().getTranslation().getDistance(targetPosition.getTranslation())
+            < 0.2 * (hasReachedTarget ? 3 : 1);
+  }
 }

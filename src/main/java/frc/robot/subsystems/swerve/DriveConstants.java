@@ -129,22 +129,22 @@ public class DriveConstants {
           new ModuleConfig(
               CAN.at(35, "FR Drive"),
               CAN.at(6, "FR Steer"),
-              9,
-              new Rotation2d(-0.503146),
+              12,
+              new Rotation2d(2.101554),
               InvertedValue.CounterClockwise_Positive,
               InvertedValue.CounterClockwise_Positive),
           new ModuleConfig(
               CAN.at(3, "BL Drive"),
               CAN.at(4, "BL Steer"),
               6,
-              new Rotation2d(2.767301),
+              new Rotation2d(2.847068),
               InvertedValue.CounterClockwise_Positive,
               InvertedValue.Clockwise_Positive),
           new ModuleConfig(
               CAN.at(2, "BR Drive"),
               CAN.at(1, "BR Steer"),
-              12,
-              new Rotation2d(-0.770058),
+              25,
+              new Rotation2d(1.377515),
               InvertedValue.CounterClockwise_Positive,
               InvertedValue.CounterClockwise_Positive)
         };
@@ -272,7 +272,7 @@ public class DriveConstants {
             3.125);
       };
 
-  public static final double STEER_CURRENT_LIMIT_AMPS = 20;
+  public static final double STEER_CURRENT_LIMIT_AMPS = 10;
   public static final double DRIVE_CURRENT_LIMIT_AMPS = 40;
 
   /**
@@ -312,7 +312,7 @@ public class DriveConstants {
   // Tolerance in Radians
   public static final HeadingControllerConstants HEADING_CONTROLLER_CONSTANTS =
       switch (getRobotType()) {
-        case COMP -> new HeadingControllerConstants(6, 0, 5, 200, 0.01);
+        case COMP -> new HeadingControllerConstants(6, 0, 5, 200, 0.03);
         case SIM -> new HeadingControllerConstants(6, 0, 5, 200, 0.01);
         case VISION -> new HeadingControllerConstants(3, 0, 5, 15, 0.007);
         case ALPHA -> new HeadingControllerConstants(6, 0, 5, 200, 0.002);
@@ -322,7 +322,7 @@ public class DriveConstants {
   public static final PIDAutoAlignControllerConstants PID_AUTOALIGN_CONSTANTS =
       switch (getRobotType()) {
         case COMP -> new PIDAutoAlignControllerConstants(
-            8, 0, 0, 2, 2, 0.01); /*FIXME: tune these constants*/
+            8, 0, 0, 3, 3, 0.03); /*FIXME: tune these constants*/
         case VISION -> new PIDAutoAlignControllerConstants(
             8, 0, 0, 3, 3, 0.01); /*FIXME: tune these constants*/
         case ALPHA -> new PIDAutoAlignControllerConstants(
@@ -465,4 +465,11 @@ public class DriveConstants {
   public static final double TRENCH_WIDTH = 0.65;
   public static final double TRENCH_LENGTH = 0.6;
   public static final Pose2d TRENCH_POSE = new Pose2d(4.6, 0.65, new Rotation2d());
+
+  public static final Pose2d BLUE_LEFT_CLIMB_DEFENSE_POSE =
+      new Pose2d(0.835, 4.718, new Rotation2d(Math.toRadians(-11)));
+  public static final Pose2d BLUE_RIGHT_CLIMB_DEFENSE_POSE =
+      new Pose2d(0.944, 2.768, new Rotation2d(Math.toRadians(19)));
+  public static final Pose2d BLUE_UNDER_TRENCH_DEFENSE_POSE =
+      new Pose2d(3.75, 0.9, new Rotation2d());
 }

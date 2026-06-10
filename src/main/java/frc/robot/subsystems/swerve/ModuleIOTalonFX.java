@@ -22,6 +22,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.MotorOutputManager;
 import frc.robot.subsystems.swerve.DriveConstants.Gains;
 import frc.robot.subsystems.swerve.DriveConstants.ModuleConfig;
 import frc.robot.subsystems.swerve.DriveConstants.MotionProfileGains;
@@ -63,7 +64,7 @@ public abstract class ModuleIOTalonFX implements ModuleIO {
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio = MODULE_CONSTANTS.driveReduction();
-    driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     driveConfig.MotorOutput.Inverted = config.driveInverted();
 
     setDriveSlot0(MODULE_CONSTANTS.driveGains());
@@ -104,6 +105,12 @@ public abstract class ModuleIOTalonFX implements ModuleIO {
     steerAppliedVolts = steerTalon.getMotorVoltage();
     steerSupplyCurrent = steerTalon.getSupplyCurrent();
     steerStatorCurrent = steerTalon.getStatorCurrent();
+
+    MotorOutputManager.getInstance()
+        .registerMotorOutputs(
+            () -> driveSupplyCurrent.getValueAsDouble(),
+            () -> steerSupplyCurrent.getValueAsDouble());
+
     // TODO: Why is this 100 Hz when everything else is 50 Hz? (Do we use can FD?)
     BaseStatusSignal.setUpdateFrequencyForAll(
         100,
@@ -208,6 +215,15 @@ public abstract class ModuleIOTalonFX implements ModuleIO {
       driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
       driveConfig.CurrentLimits.SupplyCurrentLimit = amps;
       driveTalon.getConfigurator().apply(driveConfig);
+    }
+  }
+
+  @Override
+  public void setNeutralMode(NeutralModeValue value) {
+    if (driveConfig.MotorOutput.NeutralMode != value) {
+      driveConfig.MotorOutput.NeutralMode = value;
+      driveConfig.CurrentLimits.SupplyCurrentLimit = (value == NeutralModeValue.Brake) ? 30 : 40;
+      tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
     }
   }
 }

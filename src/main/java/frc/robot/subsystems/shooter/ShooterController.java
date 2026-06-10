@@ -33,12 +33,18 @@ public class ShooterController extends SubsystemBase {
         ShooterAcceleratorTarget.IDLE,
         ShooterOmniwheelTarget.IDLE,
         SerializerTarget.IDLE),
+    REVERSE(
+        ShooterHoodTarget.STOW,
+        ShooterFlywheelTarget.INTAKE,
+        ShooterAcceleratorTarget.IDLE,
+        ShooterOmniwheelTarget.IDLE,
+        SerializerTarget.REVERSE),
     /** spin just flywheels */
     FLYWHEEL_SPIN_UP(
         ShooterHoodTarget.STOW,
         ShooterFlywheelTarget.INTAKE,
         ShooterAcceleratorTarget.IDLE,
-        ShooterOmniwheelTarget.IDLE,
+        ShooterOmniwheelTarget.SLOW_REVERSE,
         SerializerTarget.IDLE),
     /** hold: hold the balls in the hopper */
     HOLD(
@@ -79,25 +85,31 @@ public class ShooterController extends SubsystemBase {
         ShooterFlywheelTarget.SHOOT,
         ShooterAcceleratorTarget.SHOOT,
         ShooterOmniwheelTarget.IDLE,
-        SerializerTarget.IDLE),
+        SerializerTarget.SPIN_UP),
     COMPACT_SPIN_UP(
         ShooterHoodTarget.STOW,
         ShooterFlywheelTarget.SHOOT,
         ShooterAcceleratorTarget.SHOOT,
         ShooterOmniwheelTarget.IDLE,
-        SerializerTarget.IDLE),
+        SerializerTarget.SPIN_UP),
     ZEROING(
         ShooterHoodTarget.STOW,
         ShooterFlywheelTarget.IDLE,
         ShooterAcceleratorTarget.IDLE,
         ShooterOmniwheelTarget.IDLE,
         SerializerTarget.IDLE),
-    SHUTTLE(
-        ShooterHoodTarget.SHUTTLE,
-        ShooterFlywheelTarget.SHOOT,
-        ShooterAcceleratorTarget.SHOOT,
+    PASS(
+        ShooterHoodTarget.PASS,
+        ShooterFlywheelTarget.PASS,
+        ShooterAcceleratorTarget.PASS,
         ShooterOmniwheelTarget.SHOOT,
-        SerializerTarget.SHOOT);
+        SerializerTarget.SHOOT),
+    PASS_SPIN_UP(
+        ShooterHoodTarget.PASS,
+        ShooterFlywheelTarget.PASS,
+        ShooterAcceleratorTarget.PASS,
+        ShooterOmniwheelTarget.IDLE,
+        SerializerTarget.IDLE);
 
     public final ShooterHoodTarget hoodTarget;
     public final ShooterFlywheelTarget flywheelTarget;
@@ -196,7 +208,7 @@ public class ShooterController extends SubsystemBase {
 
       // Omniwheels
       if (targetState == ShooterState.SHOOT) {
-        if (shooterFlywheel.reachedVelocityTarget()) {
+        if (shooterFlywheel.reachedVelocityTarget() && shooterHood.reachedTarget()) {
           shooterOmniwheel.setVelocityTarget(targetState.omniwheelTarget);
         } else {
           shooterOmniwheel.setVelocityTarget(ShooterOmniwheelTarget.IDLE);
@@ -223,8 +235,16 @@ public class ShooterController extends SubsystemBase {
         serializer.setVelocityTarget(targetState.serializerTarget);
       }
     } else {
+      if (targetState.flywheelTarget == ShooterFlywheelTarget.INTAKE) {
+        TargetShootingState shotState = RobotState.getInstance().calculateTargetShootingState();
+        shooterFlywheel.setVelocityManual(
+            Units.MetersPerSecond.of(
+                Math.min(shotState.shooterSpeed().in(Units.MetersPerSecond), 9.5)),
+            targetState.flywheelTarget.getSupplyCurrentLimit());
+      } else {
+        shooterFlywheel.setVelocityTarget(targetState.flywheelTarget);
+      }
       shooterHood.setPositionTarget(targetState.hoodTarget);
-      shooterFlywheel.setVelocityTarget(targetState.flywheelTarget);
       shooterOmniwheel.setVelocityTarget(targetState.omniwheelTarget);
       shooterAccelerator.setVelocityTarget(targetState.acceleratorTarget);
       serializer.setVelocityTarget(targetState.serializerTarget);

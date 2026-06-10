@@ -41,16 +41,14 @@ public class ShooterFlywheelConstants {
   public static final double VELOCITY_ADJUSTMENT = 0.98;
   public static final int CURRENT_LIMIT_AMPS =
       switch (Constants.getRobotType()) {
-        case COMP -> 20;
         case SIM -> 40;
-        default -> 40;
+        default -> 20;
       };
 
   public static final ShooterFlywheelPhysicalConstants PHYSICAL_CONSTANTS = // TODO: update values
       switch (Constants.getRobotType()) {
         case SIM -> new ShooterFlywheelPhysicalConstants(0.01, 0.23938936);
-        case COMP -> new ShooterFlywheelPhysicalConstants(0.1, 0.23938936);
-        default -> new ShooterFlywheelPhysicalConstants(0.1, .1);
+        default -> new ShooterFlywheelPhysicalConstants(0.1, 0.23938936);
       };
 
   // RECORDS

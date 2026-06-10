@@ -14,7 +14,7 @@ public class ShooterHood extends GenericSuperstructure<ShooterHood.ShooterHoodTa
   public enum ShooterHoodTarget implements GenericSuperstructure.PositionTarget {
     STOW(0, ShooterHoodConstants.SUPPLY_CURRENT_LIMIT), // need to update
     SHOOT_TEMP(12, ShooterHoodConstants.SUPPLY_CURRENT_LIMIT), // need to update
-    SHUTTLE(34, ShooterHoodConstants.SUPPLY_CURRENT_LIMIT),
+    PASS(32, ShooterHoodConstants.SUPPLY_CURRENT_LIMIT),
     DEFAULT_SHOOT(14, ShooterHoodConstants.SUPPLY_CURRENT_LIMIT); // might need to update?
 
     private double position; // in rotations
@@ -63,18 +63,6 @@ public class ShooterHood extends GenericSuperstructure<ShooterHood.ShooterHoodTa
         getPositionTarget().getPosition());
   }
 
-  /**
-   * Function returns if the subsystem has reached its position target
-   *
-   * @return whether the subsystem has reached its position target
-   */
-
-  // TODO fix the logic for reaching Target Position on Shooter
-  public boolean reachedTarget() {
-    return Math.abs(super.getPosition() - (super.getPositionTarget().getPosition()))
-        <= super.getPositionTarget().getEpsilon();
-  }
-
   @Override
   public Pose3d getParentPosition() {
     if (loggableMechanism3dParent != null) {
@@ -103,5 +91,15 @@ public class ShooterHood extends GenericSuperstructure<ShooterHood.ShooterHoodTa
         .plus(
             new Transform3d(
                 Translation3d.kZero, new Rotation3d(Math.toRadians(getPosition() * 360), 0, 0)));
+  }
+
+  public boolean reachedPositionTargetManual() {
+
+    return Math.abs(
+            super.inputs.positionRotations
+                - (positionTargetManual.isPresent()
+                    ? positionTargetManual.get()
+                    : positionTarget.position))
+        < ShooterHoodConstants.POSITION_TARGET_EPSILON;
   }
 } // close class

@@ -73,25 +73,25 @@ public class FieldAxisAssistCommand extends AxisAssistCommand {
     double fieldTarget;
     if (isHorizontal()) {
       // For horizontal wall alignment, snap to PI/2 or 3PI/2 so the intake faces toward the wall
-      fieldTarget = (poseRadians > 0) ? Math.PI / 2 : -Math.PI / 2;
+      fieldTarget = (poseRadians > Math.PI) ? 0 : Math.PI;
       double offset = ROTATION_OFFSET;
       if (RobotState.getInstance().getEstimatedPose().getY() > CENTER_OF_FIELD.getY()) {
         offset *= -1;
       }
-      if (fieldTarget == Math.PI / 2) {
+      if (fieldTarget == 0) {
         offset *= -1;
       }
       fieldTarget += offset;
     } else {
       // For vertical hub alignment, snap to 0 or PI
       if (RobotState.isAllianceRed()) {
-        fieldTarget = (poseRadians > -Math.PI / 2 && poseRadians < Math.PI / 2) ? Math.PI : 0;
+        fieldTarget = (poseRadians > 0 && poseRadians < Math.PI) ? -Math.PI / 2 : Math.PI / 2;
       } else {
-        fieldTarget = (poseRadians > -Math.PI / 2 && poseRadians < Math.PI / 2) ? 0 : Math.PI;
+        fieldTarget = (poseRadians > 0 && poseRadians < Math.PI) ? Math.PI / 2 : -Math.PI / 2;
       }
       double offset = ROTATION_OFFSET;
 
-      if (fieldTarget == 0) {
+      if (fieldTarget == Math.PI / 2) {
         offset *= -1;
       }
       if (closerToBlueHub()) {

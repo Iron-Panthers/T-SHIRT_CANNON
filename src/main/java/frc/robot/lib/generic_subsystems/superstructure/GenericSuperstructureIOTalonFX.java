@@ -19,6 +19,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.MotorOutputManager;
 import java.util.ArrayList;
 
 public abstract class GenericSuperstructureIOTalonFX implements GenericSuperstructureIO {
@@ -27,6 +28,7 @@ public abstract class GenericSuperstructureIOTalonFX implements GenericSuperstru
 
   // Follower motors
   protected final ArrayList<TalonFX> followerMotors;
+  protected final ArrayList<StatusSignal<Current>> followerMotorSupplyCurrents;
 
   // Motor config
   protected final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -103,6 +105,7 @@ public abstract class GenericSuperstructureIOTalonFX implements GenericSuperstru
 
     // Initialize follower motors
     followerMotors = new ArrayList<>();
+    followerMotorSupplyCurrents = new ArrayList<>();
     for (GenericSuperstructureConfiguration.FollowerMotorConfig followerConfig :
         superstructureConfig.followerMotors) {
       TalonFX followerTalon = new TalonFX(followerConfig.id());
@@ -110,7 +113,11 @@ public abstract class GenericSuperstructureIOTalonFX implements GenericSuperstru
           new Follower(superstructureConfig.id, followerConfig.motorAlignmentValue()));
       followerTalon.setNeutralMode(NeutralModeValue.Brake);
       followerTalon.getConfigurator().apply(config);
+      followerTalon.optimizeBusUtilization();
       followerMotors.add(followerTalon);
+
+      MotorOutputManager.getInstance()
+          .registerMotorOutputs(() -> followerTalon.getSupplyCurrent().getValueAsDouble());
     }
 
     // STATUS SIGNALS
@@ -120,8 +127,19 @@ public abstract class GenericSuperstructureIOTalonFX implements GenericSuperstru
     statorCurrent = talon.getStatorCurrent();
     positionRotations = talon.getPosition();
 
+    MotorOutputManager.getInstance().registerMotorOutputs(() -> supplyCurrent.getValueAsDouble());
+
     BaseStatusSignal.setUpdateFrequencyForAll(
         50, positionRotations, velocityRPS, appliedVolts, supplyCurrent, statorCurrent);
+    if (followerMotors.size() == 0) {
+      talon.optimizeBusUtilization();
+    }
+
+    MotorOutputManager.getInstance().registerMotorOutputs(() -> supplyCurrent.getValueAsDouble());
+
+    for (StatusSignal<Current> motorCurrent : followerMotorSupplyCurrents) {
+      MotorOutputManager.getInstance().registerMotorOutputs(() -> motorCurrent.getValueAsDouble());
+    }
   }
 
   @Override

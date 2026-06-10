@@ -6,6 +6,7 @@ public interface GenericRollersIO {
   @AutoLog
   class GenericRollersIOInputs {
     public boolean connected = true;
+    public double positionRads = 0;
     public double velocityRadsPerSec = 0;
     public double appliedVolts = 0;
     public double supplyCurrentAmps = 0;
